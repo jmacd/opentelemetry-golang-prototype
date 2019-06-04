@@ -34,7 +34,7 @@ func Logf(ctx context.Context, fmt string, args ...interface{}) {
 func (l Logger) Log(ctx context.Context, msg string, fields ...core.KeyValue) {
 	observer.Record(observer.Event{
 		Type:       observer.LOG_EVENT,
-		Scope:      l.Scope.ScopeID(),
+		Scope:      l.ScopeID(),
 		String:     msg,
 		Attributes: fields,
 		Context:    ctx,
@@ -44,7 +44,7 @@ func (l Logger) Log(ctx context.Context, msg string, fields ...core.KeyValue) {
 func (l Logger) Logf(ctx context.Context, fmt string, args ...interface{}) {
 	observer.Record(observer.Event{
 		Type:      observer.LOGF_EVENT,
-		Scope:     l.Scope,
+		Scope:     l.ScopeID(),
 		String:    fmt,
 		Arguments: args,
 		Context:   ctx,

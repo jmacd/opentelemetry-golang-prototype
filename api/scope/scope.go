@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
 
 type (
@@ -49,4 +50,18 @@ func (s *scopeIdent) ScopeID() core.ScopeID {
 		return core.ScopeID{}
 	}
 	return s.id
+}
+
+func New(parent core.ScopeID, attributes ...core.KeyValue) Scope {
+	eventID := observer.Record(observer.Event{
+		Type:       observer.NEW_SCOPE,
+		Scope:      parent,
+		Attributes: attributes,
+	})
+	return &scopeIdent{
+		id: core.ScopeID{
+			EventID:     eventID,
+			SpanContext: parent.SpanContext,
+		},
+	}
 }

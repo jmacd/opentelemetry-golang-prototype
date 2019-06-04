@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/lightstep/sandbox/jmacd/otel/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
 )
 
 type (
