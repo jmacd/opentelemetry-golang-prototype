@@ -10,8 +10,8 @@ import (
 	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
 	"github.com/lightstep/opentelemetry-golang-prototype/plugin/httptrace"
 
-	// This creates a debug log on the console.
-	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/stderr"
+	// Support loading plugins.
+	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/loader"
 )
 
 var (
