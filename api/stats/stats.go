@@ -9,14 +9,22 @@ import (
 )
 
 type (
+	Interface interface {
+		Record(ctx context.Context, m ...core.Measurement)
+	}
+
 	Recorder struct {
 		scope.Scope
 	}
-
-	statsKey struct {
-		key core.Measure
-	}
 )
+
+func With(scope scope.Scope) Recorder {
+	return Recorder{scope}
+}
+
+func Record(ctx context.Context, m ...core.Measurement) {
+	With(scope.Active(ctx)).Record(ctx, m...)
+}
 
 func (s Recorder) Record(ctx context.Context, m ...core.Measurement) {
 	observer.Record(observer.Event{
