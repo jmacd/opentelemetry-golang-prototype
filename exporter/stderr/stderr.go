@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/observer"
-	"github.com/lightstep/sandbox/jmacd/otel/observer/reader"
-	"github.com/lightstep/sandbox/jmacd/otel/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/reader"
 )
 
 type (

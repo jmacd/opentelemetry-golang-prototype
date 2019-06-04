@@ -3,9 +3,9 @@ package metric
 import (
 	"context"
 
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/observer"
-	"github.com/lightstep/sandbox/jmacd/otel/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
 
 type (

@@ -5,12 +5,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/metric"
-	"github.com/lightstep/sandbox/jmacd/otel/observer"
-	"github.com/lightstep/sandbox/jmacd/otel/tag"
-	"github.com/lightstep/sandbox/jmacd/otel/trace"
-	"github.com/lightstep/sandbox/jmacd/otel/unit"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/metric"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/unit"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
 
 type (

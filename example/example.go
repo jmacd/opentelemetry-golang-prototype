@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/lightstep/opentelemetry-golang-prototype/api/log"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/metric"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/stats"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
-	"github.com/lightstep/opentelemetry-golang-prototype/impl/metric"
-	"github.com/lightstep/opentelemetry-golang-prototype/impl/stats"
-	"github.com/lightstep/opentelemetry-golang-prototype/impl/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
 
 	// This creates a debug log on the console.
 	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/stderr"

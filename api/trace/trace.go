@@ -8,9 +8,9 @@ import (
 
 	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/log"
-	"github.com/lightstep/opentelemetry-golang-prototype/api/observer"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/scope"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
 
 type (
@@ -50,7 +50,7 @@ func (t *tracer) ScopeID() core.ScopeID {
 }
 
 func (t *tracer) WithResources(attributes ...core.KeyValue) Tracer {
-	s := scope.Start(t.resources.Scope(), attributes...)
+	s := scope.New(t.resources.Scope(), attributes...)
 	return &tracer{
 		resources: s.ScopeID().EventID,
 	}
@@ -104,7 +104,7 @@ func (t *tracer) Start(ctx context.Context, name string, attributes ...core.KeyV
 		tracer:      t,
 		eventID: observer.Record(observer.Event{
 			Type:    observer.START_SPAN,
-			Scope:   scope.Start(childScope, attributes...).ScopeID(),
+			Scope:   scope.New(childScope, attributes...).ScopeID(),
 			Context: ctx,
 			Parent:  parentScope,
 			String:  name,

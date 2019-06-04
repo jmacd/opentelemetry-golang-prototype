@@ -28,15 +28,15 @@ type (
 		Inject(context.Context, Span, Injector)
 
 		// ScopeID returns the resource scope of this tracer.
-		core.Scope
+		scope.Scope
 	}
 
 	Span interface {
 		scope.Mutable
 
-		log.Logger
+		log.Interface
 
-		stats.Recorder
+		stats.Interface
 
 		SetError(bool)
 

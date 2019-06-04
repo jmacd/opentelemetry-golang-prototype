@@ -1,10 +1,10 @@
 package metric
 
 import (
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/observer"
-	"github.com/lightstep/sandbox/jmacd/otel/scope"
-	"github.com/lightstep/sandbox/jmacd/otel/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/scope"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
 
 type (
@@ -70,5 +70,5 @@ func (bm *baseMetric) Err() error {
 func (e *baseEntry) init(m Metric, values []core.KeyValue) {
 	e.base = m.base()
 	e.metric = m
-	e.eventID = scope.Start(core.ScopeID{}, values...).ScopeID().EventID
+	e.eventID = scope.New(core.ScopeID{}, values...).ScopeID().EventID
 }

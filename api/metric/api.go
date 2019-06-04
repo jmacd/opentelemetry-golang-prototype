@@ -1,9 +1,9 @@
 package metric
 
 import (
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/tag"
-	"github.com/lightstep/sandbox/jmacd/otel/unit"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/unit"
 )
 
 type (

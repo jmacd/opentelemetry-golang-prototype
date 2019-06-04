@@ -5,8 +5,8 @@ import (
 
 	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/log"
-	"github.com/lightstep/opentelemetry-golang-prototype/api/observer"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/stats"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
 
 func (sp *span) ScopeID() core.ScopeID {
