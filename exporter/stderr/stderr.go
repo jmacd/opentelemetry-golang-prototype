@@ -47,7 +47,9 @@ func (l *stderrLog) Read(data reader.Event) {
 			if data.Parent.HasSpanID() {
 				f(false)(trace.ParentSpanIDKey.String(data.SpanContext.SpanIDString()))
 			}
-			data.ParentAttributes.Foreach(f(false))
+			if data.ParentAttributes != nil {
+				data.ParentAttributes.Foreach(f(false))
+			}
 			buf.WriteString(" >")
 		}
 

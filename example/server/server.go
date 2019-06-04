@@ -10,7 +10,6 @@ import (
 	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
 	"github.com/lightstep/opentelemetry-golang-prototype/plugin/httptrace"
 
-	// Support loading plugins.
 	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/loader"
 )
 
@@ -29,13 +28,11 @@ func main() {
 
 		req = req.WithContext(tag.WithMap(req.Context(), tag.NewMap(core.KeyValue{}, tags, core.Mutator{}, nil)))
 
-		// @@@ TODO spanCtx parent issues
-		_ = spanCtx
-
 		ctx, span := tracer.Start(
 			req.Context(),
 			"hello",
-			attrs...,
+			trace.WithAttributes(attrs...),
+			trace.ChildOf(spanCtx),
 		)
 		defer span.Finish()
 

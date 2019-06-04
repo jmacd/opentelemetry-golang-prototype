@@ -35,26 +35,26 @@ const (
 )
 
 type (
-	Options func(*baseMetric, *[]tag.Options)
+	Option func(*baseMetric, *[]tag.Option)
 )
 
 // WithDescription applies provided description.
-func WithDescription(desc string) Options {
-	return func(_ *baseMetric, to *[]tag.Options) {
+func WithDescription(desc string) Option {
+	return func(_ *baseMetric, to *[]tag.Option) {
 		*to = append(*to, tag.WithDescription(desc))
 	}
 }
 
 // WithUnit applies provided unit.
-func WithUnit(unit unit.Unit) Options {
-	return func(_ *baseMetric, to *[]tag.Options) {
+func WithUnit(unit unit.Unit) Option {
+	return func(_ *baseMetric, to *[]tag.Option) {
 		*to = append(*to, tag.WithUnit(unit))
 	}
 }
 
 // WithKeys applies the provided dimension keys.
-func WithKeys(keys ...core.Key) Options {
-	return func(bm *baseMetric, _ *[]tag.Options) {
+func WithKeys(keys ...core.Key) Option {
+	return func(bm *baseMetric, _ *[]tag.Option) {
 		bm.keys = keys
 	}
 }

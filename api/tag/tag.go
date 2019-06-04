@@ -28,7 +28,7 @@ var (
 	ctxTagsKey = &ctxTagsType{}
 )
 
-func register(name string, opts []Options) *registeredKey {
+func register(name string, opts []Option) *registeredKey {
 	rk := &registeredKey{
 		name: name,
 	}

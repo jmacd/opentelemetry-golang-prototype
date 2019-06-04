@@ -96,19 +96,6 @@ const (
 //
 // TODO this type should track time-to-live for various things
 // to ensure a memory limit.
-//
-// TODO this type could support registration, to allow multiple
-// readers to share a readerObserver. Then to register a new reader,
-// scan the registered observers and register with it, if one is a
-// Reader.
-//
-// Note: This intention is to show that this type could be implemented
-// in a number of ways.  It could use a channel to move computation to
-// a dedicated group of background threads.  It could act
-// synchronously, so as to block the caller when instrumentation
-// becomes expensive. It can be implemented by concurrent
-// structures.  It could be impelmented by serializing the observer.Events
-// across a socket to another process, which would do the same stuff.
 func NewReaderObserver(readers ...Reader) observer.Observer {
 	return &readerObserver{
 		readers: readers,
@@ -138,7 +125,7 @@ func (ro *readerObserver) Observe(event observer.Event) {
 			readerScope: &readerScope{},
 		}
 
-		rattrs, _, _ := ro.readScope(event.Scope)
+		rattrs, _ := ro.readScope(event.Scope)
 
 		span.readerScope.span = span
 		span.readerScope.attributes = rattrs
@@ -148,17 +135,25 @@ func (ro *readerObserver) Observe(event observer.Event) {
 		read.SpanContext = span.spanContext
 		read.Attributes = rattrs
 
-		pattrs, _, pspan := ro.readScope(event.Parent)
+		if event.Parent.EventID == 0 && event.Parent.HasTraceID() {
+			// Remote parent
+			read.Parent = event.Parent.SpanContext
 
-		if pspan != nil {
-			read.Parent = pspan.spanContext
-			read.ParentAttributes = pattrs
+			// Note: No parent attributes in the event for remote parents.
+		} else {
+			pattrs, pspan := ro.readScope(event.Parent)
+
+			if pspan != nil {
+				// Local parent
+				read.Parent = pspan.spanContext
+				read.ParentAttributes = pattrs
+			}
 		}
 
 		ro.scopes.Store(event.Sequence, span)
 
 	case observer.FINISH_SPAN:
-		attrs, _, span := ro.readScope(event.Scope)
+		attrs, span := ro.readScope(event.Scope)
 		if span == nil {
 			panic("span not found")
 		}
@@ -178,7 +173,9 @@ func (ro *readerObserver) Observe(event observer.Event) {
 		var sid core.ScopeID
 
 		if event.Scope.EventID == 0 {
-			// TODO: This is racey
+			// TODO: This is racey. Do this at the call
+			// site somehow.  Follow the OTel resource
+			// definition SDK discussion.
 			sid = trace.GlobalTracer().ScopeID()
 		} else {
 			sid = event.Scope
@@ -246,7 +243,7 @@ func (ro *readerObserver) Observe(event observer.Event) {
 
 		read.Message = event.String
 
-		attrs, _, span := ro.readScope(event.Scope)
+		attrs, span := ro.readScope(event.Scope)
 		read.Attributes = attrs.Apply(core.KeyValue{}, event.Attributes, core.Mutator{}, nil)
 		if span != nil {
 			read.SpanContext = span.spanContext
@@ -257,7 +254,7 @@ func (ro *readerObserver) Observe(event observer.Event) {
 		read.Message = fmt.Sprintf(event.String, event.Arguments...)
 
 		read.Type = LOGF_EVENT
-		attrs, _, span := ro.readScope(event.Scope)
+		attrs, span := ro.readScope(event.Scope)
 		read.Attributes = attrs
 		if span != nil {
 			read.SpanContext = span.spanContext
@@ -272,7 +269,7 @@ func (ro *readerObserver) Observe(event observer.Event) {
 
 		read.Name = metric.readerMeasure.name
 
-		attrs, _, span := ro.readScope(event.Scope)
+		attrs, span := ro.readScope(event.Scope)
 		read.Attributes = attrs
 		if span != nil {
 			read.SpanContext = span.spanContext
@@ -289,7 +286,7 @@ func (ro *readerObserver) Observe(event observer.Event) {
 
 		read.Type = RECORD_STATS
 
-		attrs, _, span := ro.readScope(event.Scope)
+		attrs, span := ro.readScope(event.Scope)
 		read.Attributes = attrs
 		if span != nil {
 			read.SpanContext = span.spanContext
@@ -305,18 +302,18 @@ func (ro *readerObserver) Observe(event observer.Event) {
 	}
 }
 
-func (ro *readerObserver) readScope(id core.ScopeID) (tag.Map, *readerScope, *readerSpan) {
+func (ro *readerObserver) readScope(id core.ScopeID) (tag.Map, *readerSpan) {
 	if id.EventID == 0 {
-		return tag.EmptyMap, nil, nil
+		return tag.EmptyMap, nil
 	}
 	ev, has := ro.scopes.Load(id.EventID)
 	if !has {
 		panic(fmt.Sprintln("scope not found", id.EventID))
 	}
 	if sp, ok := ev.(*readerScope); ok {
-		return sp.attributes, sp, sp.span
+		return sp.attributes, sp.span
 	} else if sp, ok := ev.(*readerSpan); ok {
-		return sp.attributes, sp.readerScope, sp
+		return sp.attributes, sp
 	}
-	return tag.EmptyMap, nil, nil
+	return tag.EmptyMap, nil
 }

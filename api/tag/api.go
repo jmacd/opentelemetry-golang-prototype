@@ -19,18 +19,18 @@ type (
 		Foreach(func(kv core.KeyValue) bool)
 	}
 
-	Options func(*registeredKey)
+	Option func(*registeredKey)
 )
 
 var (
 	EmptyMap = NewMap(core.KeyValue{}, nil, core.Mutator{}, nil)
 )
 
-func New(name string, opts ...Options) core.Key { // TODO rename NewKey?
+func New(name string, opts ...Option) core.Key { // TODO rename NewKey?
 	return register(name, opts)
 }
 
-func NewMeasure(name string, opts ...Options) core.Measure {
+func NewMeasure(name string, opts ...Option) core.Measure {
 	return measure{
 		rk: register(name, opts),
 	}
@@ -84,14 +84,14 @@ func FromContext(ctx context.Context) Map {
 }
 
 // WithDescription applies provided description.
-func WithDescription(desc string) Options {
+func WithDescription(desc string) Option {
 	return func(rk *registeredKey) {
 		rk.desc = desc
 	}
 }
 
 // WithUnit applies provided unit.
-func WithUnit(unit unit.Unit) Options {
+func WithUnit(unit unit.Unit) Option {
 	return func(rk *registeredKey) {
 		rk.unit = unit
 	}

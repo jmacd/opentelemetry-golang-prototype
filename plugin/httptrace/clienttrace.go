@@ -42,7 +42,7 @@ func newClientTracer(ctx context.Context) *clientTracer {
 }
 
 func (ct *clientTracer) open(name string, attrs ...core.KeyValue) {
-	_, sp := trace.Start(ct.Context, name, attrs...)
+	_, sp := trace.Start(ct.Context, name, trace.WithAttributes(attrs...))
 	ct.levels = append(ct.levels, clientLevel{
 		Span:  sp,
 		ident: name,

@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func NewFloat64Gauge(name string, mos ...Options) *Float64Gauge {
+func NewFloat64Gauge(name string, mos ...Option) *Float64Gauge {
 	m := initBaseMetric(name, GaugeFloat64, mos, &Float64Gauge{}).(*Float64Gauge)
 	return m
 }

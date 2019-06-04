@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/log"
@@ -66,6 +67,7 @@ func (g *tracer) WithService(name string) Tracer {
 
 func (t *tracer) WithSpan(ctx context.Context, name string, body func(context.Context) error) error {
 	// TODO: use runtime/trace.WithRegion for execution tracer support
+	// TODO: use runtime/pprof.Do for profile tags support
 	ctx, span := t.Start(ctx, name)
 	defer span.Finish()
 
@@ -77,13 +79,37 @@ func (t *tracer) WithSpan(ctx context.Context, name string, body func(context.Co
 	return nil
 }
 
-// TODO options, should be Options
-func (t *tracer) Start(ctx context.Context, name string, attributes ...core.KeyValue) (context.Context, Span) {
+func (t *tracer) Start(ctx context.Context, name string, opts ...Option) (context.Context, Span) {
 	var child core.SpanContext
 
-	parentScope := Active(ctx).ScopeID()
-
 	child.SpanID = rand.Uint64()
+
+	var startTime time.Time
+	var attributes []core.KeyValue
+	var reference Reference
+
+	for _, opt := range opts {
+		if !opt.startTime.IsZero() {
+			startTime = opt.startTime
+		}
+		if len(opt.attributes) != 0 {
+			attributes = append(opt.attributes, attributes...)
+		}
+		if opt.attribute.Key != nil {
+			attributes = append(attributes, opt.attribute)
+		}
+		if opt.reference.HasTraceID() {
+			reference = opt.reference
+		}
+	}
+
+	var parentScope core.ScopeID
+
+	if reference.HasTraceID() {
+		parentScope = reference.Scope()
+	} else {
+		parentScope = Active(ctx).ScopeID()
+	}
 
 	if parentScope.HasTraceID() {
 		parent := parentScope.SpanContext
@@ -103,6 +129,7 @@ func (t *tracer) Start(ctx context.Context, name string, attributes ...core.KeyV
 		spanContext: child,
 		tracer:      t,
 		eventID: observer.Record(observer.Event{
+			Time:    startTime,
 			Type:    observer.START_SPAN,
 			Scope:   scope.New(childScope, attributes...).ScopeID(),
 			Context: ctx,

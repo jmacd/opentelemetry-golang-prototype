@@ -52,9 +52,8 @@ func ServerHeaders(req *http.Request) ([]core.KeyValue, []core.KeyValue, core.Sp
 		if ts.Vendor != Vendor {
 			continue
 		}
-		// @@@ Lots to desire... tag.Key registry, max-hops,
-		// type conversion questions answered, case-conversion
-		// questions.
+		// TODO: max-hops, type conversion questions answered,
+		// case-conversion questions.
 		tags = append(tags, tag.New(ts.Tenant).String(ts.Value))
 	}
 
@@ -73,7 +72,7 @@ func (h hinjector) Inject(sc core.SpanContext, tags tag.Map) {
 	tc.TraceParent.Version = tracecontext.Version
 	tc.TraceParent.TraceID = tid
 	tc.TraceParent.SpanID = sid
-	tc.TraceParent.Flags.Recorded = true // @@@ not implemented
+	tc.TraceParent.Flags.Recorded = true // Note: not implemented.
 
 	tags.Foreach(func(kv core.KeyValue) bool {
 		// TODO: implement MaxHops

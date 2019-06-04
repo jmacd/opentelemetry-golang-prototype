@@ -24,8 +24,8 @@ type (
 	}
 )
 
-func initBaseMetric(name string, mtype MetricType, opts []Options, init Metric) Metric {
-	var tagOpts []tag.Options
+func initBaseMetric(name string, mtype MetricType, opts []Option, init Metric) Metric {
+	var tagOpts []tag.Option
 	bm := init.base()
 
 	for _, opt := range opts {

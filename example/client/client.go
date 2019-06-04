@@ -10,7 +10,6 @@ import (
 	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
 	"github.com/lightstep/opentelemetry-golang-prototype/plugin/httptrace"
 
-	// Support loading plugins
 	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/loader"
 )
 

@@ -8,11 +8,8 @@ import (
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
 
-var (
-	pluginName = os.Getenv("OPENTELEMETRY_LIB")
-)
-
 func init() {
+	pluginName := os.Getenv("OPENTELEMETRY_LIB")
 	if pluginName == "" {
 		return
 	}

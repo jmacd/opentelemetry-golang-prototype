@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+	"time"
 
 	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/log"
@@ -12,7 +13,7 @@ import (
 
 type (
 	Tracer interface {
-		Start(context.Context, string, ...core.KeyValue) (context.Context, Span)
+		Start(context.Context, string, ...Option) (context.Context, Span)
 
 		WithSpan(
 			ctx context.Context,
@@ -48,6 +49,25 @@ type (
 	Injector interface {
 		Inject(core.SpanContext, tag.Map)
 	}
+
+	Option struct {
+		attribute  core.KeyValue
+		attributes []core.KeyValue
+		startTime  time.Time
+		reference  Reference
+	}
+
+	Reference struct {
+		core.SpanContext
+		RelationshipType
+	}
+
+	RelationshipType int
+)
+
+const (
+	ChildOfRelationship RelationshipType = iota
+	FollowsFromRelationship
 )
 
 func GlobalTracer() Tracer {
@@ -61,8 +81,8 @@ func SetGlobalTracer(t Tracer) {
 	global.Store(t)
 }
 
-func Start(ctx context.Context, name string, attrs ...core.KeyValue) (context.Context, Span) {
-	return GlobalTracer().Start(ctx, name, attrs...)
+func Start(ctx context.Context, name string, opts ...Option) (context.Context, Span) {
+	return GlobalTracer().Start(ctx, name, opts...)
 }
 
 func Active(ctx context.Context) Span {
@@ -85,4 +105,40 @@ func Inject(ctx context.Context, injector Injector) {
 	}
 
 	span.Tracer().Inject(ctx, span, injector)
+}
+
+func WithStartTime(t time.Time) Option {
+	return Option{
+		startTime: t,
+	}
+}
+
+func WithAttributes(attrs ...core.KeyValue) Option {
+	return Option{
+		attributes: attrs,
+	}
+}
+
+func WithAttribute(attr core.KeyValue) Option {
+	return Option{
+		attribute: attr,
+	}
+}
+
+func ChildOf(sc core.SpanContext) Option {
+	return Option{
+		reference: Reference{
+			SpanContext:      sc,
+			RelationshipType: ChildOfRelationship,
+		},
+	}
+}
+
+func FollowsFrom(sc core.SpanContext) Option {
+	return Option{
+		reference: Reference{
+			SpanContext:      sc,
+			RelationshipType: FollowsFromRelationship,
+		},
+	}
 }
