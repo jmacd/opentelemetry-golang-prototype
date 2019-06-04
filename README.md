@@ -24,3 +24,29 @@ then set the `OPENTELEMETRY_LIB` environment variable to the .so file in that di
 ```
 OPENTELEMETRY_LIB=./exporter/stderr/plugin/stderr.so go run ./example/client/client.go
 ```
+
+The output of this program reads:
+
+```
+2019/06/04 16-51-32.075834 start say hello, a root span [ component=main whatevs=yesss service=client username=donuts span_id=4d6..d52 trace_id=786..21d ]
+2019/06/04 16-51-32.076073 start http.request < parent_span_id=b80..c03 service=client component=main whatevs=yesss > [ username=donuts span_id=b80..c03 trace_id=786..21d ]
+2019/06/04 16-51-32.076208 start http.getconn < parent_span_id=365..2d1 service=client component=main whatevs=yesss > [ http.host=localhost:7777 username=donuts span_id=365..2d1 trace_id=786..21d ]
+2019/06/04 16-51-32.076399 start http.dns < parent_span_id=57e..8d8 service=client component=main whatevs=yesss > [ username=donuts span_id=57e..8d8 trace_id=786..21d ]
+2019/06/04 16-51-32.172726 finish http.dns (96.32742ms) [ username=donuts span_id=57e..8d8 trace_id=786..21d ]
+2019/06/04 16-51-32.172871 start http.connect < parent_span_id=886..01e service=client component=main whatevs=yesss > [ username=donuts span_id=886..01e trace_id=786..21d ]
+2019/06/04 16-51-32.173570 finish http.connect (698.912µs) [ username=donuts span_id=886..01e trace_id=786..21d ]
+2019/06/04 16-51-32.173654 modify attr [ http.host=localhost:7777 http.remote=127.0.0.1:7777 username=donuts span_id=365..2d1 trace_id=786..21d ]
+2019/06/04 16-51-32.173757 modify attr [ http.host=localhost:7777 http.remote=127.0.0.1:7777 http.local=127.0.0.1:61376 username=donuts span_id=365..2d1 trace_id=786..21d ]
+2019/06/04 16-51-32.173858 finish http.getconn (97.649927ms) [ http.host=localhost:7777 http.remote=127.0.0.1:7777 http.local=127.0.0.1:61376 username=donuts span_id=365..2d1 trace_id=786..21d ]
+2019/06/04 16-51-32.174024 start http.headers < parent_span_id=940..294 service=client component=main whatevs=yesss > [ username=donuts span_id=940..294 trace_id=786..21d ]
+2019/06/04 16-51-32.174050 modify attr [ http.host=localhost:7777 username=donuts span_id=b80..c03 trace_id=786..21d ]
+2019/06/04 16-51-32.174066 modify attr [ http.user-agent=Go-http-client/1.1 http.host=localhost:7777 username=donuts span_id=b80..c03 trace_id=786..21d ]
+2019/06/04 16-51-32.174117 modify attr [ http.host=localhost:7777 http.user-agent=Go-http-client/1.1 http.traceparent=00-78629a0f5f3f164fd5104dc76695721d-4d65822107fcfd52-01 username=donuts span_id=b80..c03 trace_id=786..21d ]
+2019/06/04 16-51-32.174139 modify attr [ http.host=localhost:7777 http.user-agent=Go-http-client/1.1 http.traceparent=00-78629a0f5f3f164fd5104dc76695721d-4d65822107fcfd52-01 http.tracestate=ot@username=donuts username=donuts span_id=b80..c03 trace_id=786..21d ]
+2019/06/04 16-51-32.174165 modify attr [ http.user-agent=Go-http-client/1.1 http.traceparent=00-78629a0f5f3f164fd5104dc76695721d-4d65822107fcfd52-01 http.tracestate=ot@username=donuts http.accept-encoding=gzip http.host=localhost:7777 username=donuts span_id=b80..c03 trace_id=786..21d ]
+2019/06/04 16-51-32.174183 start http.send < parent_span_id=0c6..7a0 whatevs=yesss service=client component=main > [ username=donuts span_id=0c6..7a0 trace_id=786..21d ]
+2019/06/04 16-51-32.174201 finish http.send (18.179µs) [ username=donuts span_id=0c6..7a0 trace_id=786..21d ]
+2019/06/04 16-51-32.175226 start http.receive < parent_span_id=a68..b99 service=client component=main whatevs=yesss > [ username=donuts span_id=a68..b99 trace_id=786..21d ]
+2019/06/04 16-51-32.175384 finish http.receive (157.839µs) [ username=donuts span_id=a68..b99 trace_id=786..21d ]
+2019/06/04 16-51-32.175438 finish say hello (99.603385ms) [ service=client component=main whatevs=yesss username=donuts span_id=4d6..d52 trace_id=786..21d ]
+```
