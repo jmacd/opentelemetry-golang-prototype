@@ -31,7 +31,6 @@ func (l *stderrLog) Read(data reader.Event) {
 		}
 	}
 
-	buf.WriteString(fmt.Sprint(data.Sequence, ": "))
 	buf.WriteString(data.Time.Format("2006/01/02 15-04-05.000000"))
 	buf.WriteString(" ")
 
