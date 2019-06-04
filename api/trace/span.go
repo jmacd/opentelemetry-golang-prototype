@@ -3,10 +3,10 @@ package trace
 import (
 	"context"
 
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/log"
-	"github.com/lightstep/sandbox/jmacd/otel/observer"
-	"github.com/lightstep/sandbox/jmacd/otel/stats"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/log"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/observer"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/stats"
 )
 
 func (sp *span) ScopeID() core.ScopeID {

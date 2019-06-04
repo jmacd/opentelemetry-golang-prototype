@@ -3,11 +3,11 @@ package trace
 import (
 	"context"
 
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/log"
-	"github.com/lightstep/sandbox/jmacd/otel/scope"
-	"github.com/lightstep/sandbox/jmacd/otel/stats"
-	"github.com/lightstep/sandbox/jmacd/otel/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/log"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/scope"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/stats"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
 )
 
 type (
