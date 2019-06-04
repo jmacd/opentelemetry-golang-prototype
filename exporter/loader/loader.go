@@ -14,25 +14,24 @@ var (
 
 func init() {
 	if pluginName == "" {
-		fmt.Println("Env not set")
 		return
 	}
 	sharedObj, err := plugin.Open(pluginName)
 	if err != nil {
-		fmt.Println("OPEN failed: ", err)
+		fmt.Println("Open failed", pluginName, err)
 		return
 	}
 
 	obsPlugin, err := sharedObj.Lookup("Observer")
 	if err != nil {
-		fmt.Println("Symbol not found: ", err)
+		fmt.Println("Observer not found", pluginName, err)
 		return
 	}
 
-	obs, ok := obsPlugin.(observer.Observer)
+	obs, ok := obsPlugin.(*observer.Observer)
 	if !ok {
-		fmt.Println("Symbol not an observer: ", err)
+		fmt.Printf("Observer not valid\n")
 		return
 	}
-	observer.RegisterObserver(obs)
+	observer.RegisterObserver(*obs)
 }
