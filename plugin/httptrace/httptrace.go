@@ -4,14 +4,14 @@ import (
 	"encoding/binary"
 	"net/http"
 
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
 	"github.com/lightstep/tracecontext.go"
 	"github.com/lightstep/tracecontext.go/tracestate"
 )
 
 const (
-	Vendor = "otel"
+	Vendor = "ot"
 )
 
 type (

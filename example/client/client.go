@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/lightstep/sandbox/jmacd/otel/plugin/httptrace"
-	"github.com/lightstep/sandbox/jmacd/otel/tag"
-	"github.com/lightstep/sandbox/jmacd/otel/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/plugin/httptrace"
 
 	// This creates a debug log on the console.
-	_ "github.com/lightstep/sandbox/jmacd/otel/observer/debug"
+	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/stderr"
 )
 
 var (

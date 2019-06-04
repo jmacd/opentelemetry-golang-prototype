@@ -7,9 +7,9 @@ import (
 	"net/textproto"
 	"strings"
 
-	"github.com/lightstep/sandbox/jmacd/otel/core"
-	"github.com/lightstep/sandbox/jmacd/otel/tag"
-	"github.com/lightstep/sandbox/jmacd/otel/trace"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
 )
 
 type (
