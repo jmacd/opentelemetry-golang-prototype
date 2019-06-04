@@ -24,7 +24,7 @@ type (
 		WithComponent(name string) Tracer
 		WithResources(res ...core.KeyValue) Tracer
 
-		// TODO: see https://github.com/opentracing/opentracing-go/issues/127
+		// Note: see https://github.com/opentracing/opentracing-go/issues/127
 		Inject(context.Context, Span, Injector)
 
 		// ScopeID returns the resource scope of this tracer.
@@ -67,7 +67,6 @@ func Start(ctx context.Context, name string, attrs ...core.KeyValue) (context.Co
 
 func Active(ctx context.Context) Span {
 	span, _ := scope.Active(ctx).(*span)
-	// TODO make a real no-op
 	return span
 }
 

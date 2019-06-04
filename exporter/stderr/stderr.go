@@ -11,20 +11,14 @@ import (
 )
 
 type (
-	debugLog struct{}
+	stderrLog struct{}
 )
 
-var (
-	logger = newDebugLog()
-)
-
-func newDebugLog() *debugLog {
-	logger := &debugLog{}
-	observer.RegisterObserver(reader.NewReaderObserver(logger))
-	return logger
+func New() observer.Observer {
+	return reader.NewReaderObserver(&stderrLog{})
 }
 
-func (l *debugLog) Read(data reader.Event) {
+func (l *stderrLog) Read(data reader.Event) {
 	var buf strings.Builder
 
 	f := func(skipIf bool) func(kv core.KeyValue) bool {

@@ -10,7 +10,10 @@ import (
 	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
 
 	// This creates a debug log on the console.
-	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/stderr"
+	// _ "github.com/lightstep/opentelemetry-golang-prototype/exporter/stderr/impl"
+	//
+	// Auto-load instrumentation
+	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/loader"
 )
 
 var (
