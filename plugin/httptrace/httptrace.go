@@ -27,9 +27,8 @@ var (
 	encoding = binary.BigEndian
 )
 
-// @@@ Extract
-
-func ServerHeaders(req *http.Request) ([]core.KeyValue, []core.KeyValue, core.SpanContext) {
+// Returns the Attributes, Context Tags, and SpanContext that were encoded by Inject.
+func Extract(req *http.Request) ([]core.KeyValue, []core.KeyValue, core.SpanContext) {
 	tc, err := tracecontext.FromHeaders(req.Header)
 
 	if err != nil {

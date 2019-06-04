@@ -24,7 +24,7 @@ var (
 
 func main() {
 	helloHandler := func(w http.ResponseWriter, req *http.Request) {
-		attrs, tags, spanCtx := httptrace.ServerHeaders(req)
+		attrs, tags, spanCtx := httptrace.Extract(req)
 
 		req = req.WithContext(tag.WithMap(req.Context(), tag.NewMap(core.KeyValue{}, tags, core.Mutator{}, nil)))
 
