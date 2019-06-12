@@ -129,6 +129,10 @@ func (sp *span) Logf(ctx context.Context, fmt string, args ...interface{}) {
 	log.With(sp).Logf(ctx, fmt, args...)
 }
 
-func (sp *span) Record(ctx context.Context, args ...core.Measurement) {
-	stats.With(sp).Record(ctx, args...)
+func (sp *span) Record(ctx context.Context, m ...core.Measurement) {
+	stats.With(sp).Record(ctx, m...)
+}
+
+func (sp *span) RecordSingle(ctx context.Context, m core.Measurement) {
+	stats.With(sp).RecordSingle(ctx, m)
 }

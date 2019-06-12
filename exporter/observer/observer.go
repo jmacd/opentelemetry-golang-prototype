@@ -21,7 +21,6 @@ type (
 		Type    EventType       // All events
 		Scope   core.ScopeID    // All events
 		Context context.Context // core.FromContext() and scope.Active()
-		Metric  core.EventID
 
 		// Arguments (type-specific)
 		Attribute  core.KeyValue   // SET_ATTRIBUTE
@@ -36,6 +35,7 @@ type (
 		Float64 float64
 		Parent  core.ScopeID // START_SPAN
 		Stats   []core.Measurement
+		Stat    core.Measurement
 	}
 
 	Observer interface {
@@ -53,8 +53,6 @@ const (
 	FINISH_SPAN
 	LOG_EVENT
 	LOGF_EVENT
-	SET_GAUGE
-	ADD_GAUGE
 	NEW_SCOPE
 	NEW_MEASURE
 	NEW_METRIC

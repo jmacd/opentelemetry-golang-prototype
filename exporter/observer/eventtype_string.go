@@ -13,18 +13,16 @@ func _() {
 	_ = x[FINISH_SPAN-2]
 	_ = x[LOG_EVENT-3]
 	_ = x[LOGF_EVENT-4]
-	_ = x[SET_GAUGE-5]
-	_ = x[ADD_GAUGE-6]
-	_ = x[NEW_SCOPE-7]
-	_ = x[NEW_MEASURE-8]
-	_ = x[NEW_METRIC-9]
-	_ = x[MODIFY_ATTR-10]
-	_ = x[RECORD_STATS-11]
+	_ = x[NEW_SCOPE-5]
+	_ = x[NEW_MEASURE-6]
+	_ = x[NEW_METRIC-7]
+	_ = x[MODIFY_ATTR-8]
+	_ = x[RECORD_STATS-9]
 }
 
-const _EventType_name = "INVALIDSTART_SPANFINISH_SPANLOG_EVENTLOGF_EVENTSET_GAUGEADD_GAUGENEW_SCOPENEW_MEASURENEW_METRICMODIFY_ATTRRECORD_STATS"
+const _EventType_name = "INVALIDSTART_SPANFINISH_SPANLOG_EVENTLOGF_EVENTNEW_SCOPENEW_MEASURENEW_METRICMODIFY_ATTRRECORD_STATS"
 
-var _EventType_index = [...]uint8{0, 7, 17, 28, 37, 47, 56, 65, 74, 85, 95, 106, 118}
+var _EventType_index = [...]uint8{0, 7, 17, 28, 37, 47, 56, 67, 77, 88, 100}
 
 func (i EventType) String() string {
 	if i < 0 || i >= EventType(len(_EventType_index)-1) {

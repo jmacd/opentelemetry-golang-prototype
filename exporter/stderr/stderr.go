@@ -66,22 +66,28 @@ func (l *stderrLog) Read(data reader.Event) {
 	case reader.LOGF_EVENT:
 		buf.WriteString(data.Message)
 
-	case reader.SET_GAUGE:
-		buf.WriteString("set gauge ")
-		buf.WriteString(data.Name)
-	case reader.ADD_GAUGE:
-		buf.WriteString("add gauge")
-		buf.WriteString(data.Name)
 	case reader.MODIFY_ATTR:
 		buf.WriteString("modify attr")
 	case reader.RECORD_STATS:
 		buf.WriteString("record")
 
-		buf.WriteString(" <")
 		for _, s := range data.Stats {
 			f(false)(s.Measure.V(s.Value))
+
+			buf.WriteString(" {")
+			i := 0
+			s.Tags.Foreach(func(kv core.KeyValue) bool {
+				if i != 0 {
+					buf.WriteString(",")
+				}
+				i++
+				buf.WriteString(kv.Key.Name())
+				buf.WriteString("=")
+				buf.WriteString(kv.Value.Emit())
+				return true
+			})
+			buf.WriteString("}")
 		}
-		buf.WriteString(" >")
 	default:
 		buf.WriteString(fmt.Sprintf("WAT? %d", data.Type))
 	}

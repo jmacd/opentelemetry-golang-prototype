@@ -27,7 +27,7 @@ type (
 		SpanContext core.SpanContext
 		Tags        tag.Map
 		Attributes  tag.Map
-		Stats       []core.Measurement
+		Stats       []Measurement
 
 		Parent           core.SpanContext
 		ParentAttributes tag.Map
@@ -35,6 +35,12 @@ type (
 		Duration time.Duration
 		Name     string
 		Message  string
+	}
+
+	Measurement struct {
+		Measure core.Measure
+		Value   float64
+		Tags    tag.Map
 	}
 
 	readerObserver struct {
@@ -85,8 +91,6 @@ const (
 	FINISH_SPAN
 	LOG_EVENT
 	LOGF_EVENT
-	SET_GAUGE
-	ADD_GAUGE
 	MODIFY_ATTR
 	RECORD_STATS
 )
@@ -265,38 +269,41 @@ func (ro *readerObserver) Observe(event observer.Event) {
 			read.SpanContext = span.spanContext
 		}
 
-	case observer.SET_GAUGE, observer.ADD_GAUGE:
-		metricI, ok := ro.metrics.Load(event.Metric)
-		if !ok {
-			panic("Metric not defined")
-		}
-		metric := metricI.(*readerMetric)
+	// case observer.SET_GAUGE, observer.ADD_GAUGE:
+	// 	metricI, ok := ro.metrics.Load(event.Metric)
+	// 	if !ok {
+	// 		panic("Metric not defined")
+	// 	}
+	// 	metric := metricI.(*readerMetric)
 
-		read.Name = metric.readerMeasure.name
+	// 	read.Name = metric.readerMeasure.name
 
-		attrs, span := ro.readScope(event.Scope)
-		read.Attributes = attrs
-		if span != nil {
-			read.SpanContext = span.spanContext
-		}
-		// TODO filter to pre-aggregated tag set
+	// 	attrs, span := ro.readScope(event.Scope)
+	// 	read.Attributes = attrs
+	// 	if span != nil {
+	// 		read.SpanContext = span.spanContext
+	// 	}
+	// 	// TODO filter to pre-aggregated tag set
 
-		if event.Type == observer.SET_GAUGE {
-			read.Type = SET_GAUGE
-		} else {
-			read.Type = ADD_GAUGE
-		}
+	// 	if event.Type == observer.SET_GAUGE {
+	// 		read.Type = SET_GAUGE
+	// 	} else {
+	// 		read.Type = ADD_GAUGE
+	// 	}
 
 	case observer.RECORD_STATS:
-
 		read.Type = RECORD_STATS
 
-		attrs, span := ro.readScope(event.Scope)
-		read.Attributes = attrs
+		_, span := ro.readScope(event.Scope)
 		if span != nil {
 			read.SpanContext = span.spanContext
 		}
-		read.Stats = event.Stats
+		for _, es := range event.Stats {
+			ro.addMeasurement(&read, es)
+		}
+		if event.Stat.Measure != nil {
+			ro.addMeasurement(&read, event.Stat)
+		}
 
 	default:
 		panic(fmt.Sprint("Unhandled case: ", event.Type))
@@ -305,6 +312,15 @@ func (ro *readerObserver) Observe(event observer.Event) {
 	for _, reader := range ro.readers {
 		reader.Read(read)
 	}
+}
+
+func (ro *readerObserver) addMeasurement(e *Event, m core.Measurement) {
+	attrs, _ := ro.readScope(m.ScopeID)
+	e.Stats = append(e.Stats, Measurement{
+		Measure: m.Measure,
+		Value:   m.Value,
+		Tags:    attrs,
+	})
 }
 
 func (ro *readerObserver) readScope(id core.ScopeID) (tag.Map, *readerSpan) {
