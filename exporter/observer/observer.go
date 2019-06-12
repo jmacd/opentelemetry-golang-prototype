@@ -42,7 +42,7 @@ type (
 		Observe(data Event)
 	}
 
-	exportersMap map[Observer]struct{}
+	observersMap map[Observer]struct{}
 )
 
 //go:generate stringer -type=EventType
@@ -63,42 +63,46 @@ const (
 )
 
 var (
-	exporterMu sync.Mutex
-	exporters  atomic.Value
+	observerMu sync.Mutex
+	observers  atomic.Value
 
 	sequenceNum uint64
 )
 
+func NextEventID() core.EventID {
+	return core.EventID(atomic.AddUint64(&sequenceNum, 1))
+}
+
 // RegisterObserver adds to the list of Observers that will receive sampled
 // trace spans.
 //
-// Binaries can register exporters, libraries shouldn't register exporters.
+// Binaries can register observers, libraries shouldn't register observers.
 func RegisterObserver(e Observer) {
-	exporterMu.Lock()
-	new := make(exportersMap)
-	if old, ok := exporters.Load().(exportersMap); ok {
+	observerMu.Lock()
+	new := make(observersMap)
+	if old, ok := observers.Load().(observersMap); ok {
 		for k, v := range old {
 			new[k] = v
 		}
 	}
 	new[e] = struct{}{}
-	exporters.Store(new)
-	exporterMu.Unlock()
+	observers.Store(new)
+	observerMu.Unlock()
 }
 
 // UnregisterObserver removes from the list of Observers the Observer that was
 // registered with the given name.
 func UnregisterObserver(e Observer) {
-	exporterMu.Lock()
-	new := make(exportersMap)
-	if old, ok := exporters.Load().(exportersMap); ok {
+	observerMu.Lock()
+	new := make(observersMap)
+	if old, ok := observers.Load().(observersMap); ok {
 		for k, v := range old {
 			new[k] = v
 		}
 	}
 	delete(new, e)
-	exporters.Store(new)
-	exporterMu.Unlock()
+	observers.Store(new)
+	observerMu.Unlock()
 }
 
 func Record(event Event) core.EventID {
@@ -109,13 +113,16 @@ func Record(event Event) core.EventID {
 		event.Time = time.Now()
 	}
 
-	exp, _ := exporters.Load().(exportersMap)
-	for e := range exp {
-		e.Observe(event)
+	observers, _ := observers.Load().(observersMap)
+	for observer, _ := range observers {
+		observer.Observe(event)
 	}
 	return event.Sequence
 }
 
-func NextEventID() core.EventID {
-	return core.EventID(atomic.AddUint64(&sequenceNum, 1))
+func Foreach(f func(Observer)) {
+	observers, _ := observers.Load().(observersMap)
+	for observer, _ := range observers {
+		f(observer)
+	}
 }

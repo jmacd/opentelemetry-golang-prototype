@@ -9,7 +9,7 @@ import (
 	"github.com/lightstep/opentelemetry-golang-prototype/api/tag"
 	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
 
-	_ "github.com/lightstep/opentelemetry-golang-prototype/exporter/loader"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/loader"
 )
 
 var (
@@ -73,4 +73,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	loader.Flush()
 }
