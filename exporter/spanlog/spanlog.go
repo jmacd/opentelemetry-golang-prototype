@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/buffer"
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/spandata"
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/spandata/format"
@@ -14,7 +15,7 @@ type (
 )
 
 func New() observer.Observer {
-	return spandata.NewReaderObserver(&spanLog{})
+	return buffer.NewBuffer(1000, spandata.NewReaderObserver(&spanLog{}))
 }
 
 func (s *spanLog) Read(data *spandata.Span) {
