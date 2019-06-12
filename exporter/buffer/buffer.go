@@ -52,6 +52,8 @@ func (b *Buffer) run() {
 		case <-b.close:
 			return
 		case ev := <-b.events:
+			// TODO: This has to ensure ordered arrival,
+			// e.g., put into a heap and delay observations.
 			for _, obs := range b.observers {
 				obs.Observe(ev)
 			}

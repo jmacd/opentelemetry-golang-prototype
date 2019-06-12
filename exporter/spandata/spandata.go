@@ -24,7 +24,7 @@ func NewReaderObserver(w io.Writer) observer.Observer {
 }
 
 func (s *spanReader) Read(data reader.Event) {
-	switch {
+	switch data.Type {
 	case reader.START_SPAN:
 	case reader.FINISH_SPAN:
 	case reader.LOG_EVENT:

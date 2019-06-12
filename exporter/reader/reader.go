@@ -79,9 +79,8 @@ type (
 
 	readerScope struct {
 		span       *readerSpan
+		parent     core.EventID
 		attributes tag.Map
-
-		// TODO preserve scope chain, for cleanup
 	}
 )
 
@@ -99,9 +98,6 @@ const (
 // necessary state needed by a reader to process events in memory.
 // Practically, this means tracking live metric handles and scope
 // attribute sets.
-//
-// TODO this type should track time-to-live for various things
-// to ensure a memory limit.
 func NewReaderObserver(readers ...Reader) observer.Observer {
 	return &readerObserver{
 		readers: readers,
@@ -174,8 +170,6 @@ func (ro *readerObserver) Observe(event observer.Event) {
 
 		// TODO: recovered
 
-		// TODO: erase scope chain
-
 	case observer.NEW_SCOPE, observer.MODIFY_ATTR:
 		var span *readerSpan
 		var m tag.Map
@@ -183,8 +177,7 @@ func (ro *readerObserver) Observe(event observer.Event) {
 
 		if event.Scope.EventID == 0 {
 			// TODO: This is racey. Do this at the call
-			// site somehow.  Follow the OTel resource
-			// definition SDK discussion.
+			// site via Resources.
 			sid = trace.GlobalTracer().ScopeID()
 		} else {
 			sid = event.Scope
@@ -206,7 +199,8 @@ func (ro *readerObserver) Observe(event observer.Event) {
 		}
 
 		sc := &readerScope{
-			span: span,
+			span:   span,
+			parent: sid.EventID,
 			attributes: m.Apply(
 				event.Attribute,
 				event.Attributes,
@@ -269,28 +263,6 @@ func (ro *readerObserver) Observe(event observer.Event) {
 			read.SpanContext = span.spanContext
 		}
 
-	// case observer.SET_GAUGE, observer.ADD_GAUGE:
-	// 	metricI, ok := ro.metrics.Load(event.Metric)
-	// 	if !ok {
-	// 		panic("Metric not defined")
-	// 	}
-	// 	metric := metricI.(*readerMetric)
-
-	// 	read.Name = metric.readerMeasure.name
-
-	// 	attrs, span := ro.readScope(event.Scope)
-	// 	read.Attributes = attrs
-	// 	if span != nil {
-	// 		read.SpanContext = span.spanContext
-	// 	}
-	// 	// TODO filter to pre-aggregated tag set
-
-	// 	if event.Type == observer.SET_GAUGE {
-	// 		read.Type = SET_GAUGE
-	// 	} else {
-	// 		read.Type = ADD_GAUGE
-	// 	}
-
 	case observer.RECORD_STATS:
 		read.Type = RECORD_STATS
 
@@ -311,6 +283,10 @@ func (ro *readerObserver) Observe(event observer.Event) {
 
 	for _, reader := range ro.readers {
 		reader.Read(read)
+	}
+
+	if event.Type == observer.FINISH_SPAN {
+		ro.cleanupSpan(event.Scope.EventID)
 	}
 }
 
@@ -337,4 +313,20 @@ func (ro *readerObserver) readScope(id core.ScopeID) (tag.Map, *readerSpan) {
 		return sp.attributes, sp
 	}
 	return tag.EmptyMap, nil
+}
+
+func (ro *readerObserver) cleanupSpan(id core.EventID) {
+	for id != 0 {
+		ev, has := ro.scopes.Load(id)
+		if !has {
+			panic(fmt.Sprintln("scope not found", id))
+		}
+		ro.scopes.Delete(id)
+
+		if sp, ok := ev.(*readerScope); ok {
+			id = sp.parent
+		} else if sp, ok := ev.(*readerSpan); ok {
+			id = sp.parent
+		}
+	}
 }
