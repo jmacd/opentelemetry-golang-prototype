@@ -12,7 +12,7 @@ type (
 	}
 
 	Span struct {
-		events []reader.Event
+		Events []reader.Event
 	}
 
 	spanReader struct {
@@ -34,7 +34,7 @@ func (s *spanReader) Read(data reader.Event) {
 	}
 	var span *Span
 	if data.Type == reader.START_SPAN {
-		span = &Span{events: make([]reader.Event, 4)}
+		span = &Span{Events: make([]reader.Event, 4)}
 		s.spans[data.SpanContext] = span
 	} else {
 		span := s.spans[data.SpanContext]
@@ -44,7 +44,7 @@ func (s *spanReader) Read(data reader.Event) {
 		}
 	}
 
-	span.events = append(span.events, data)
+	span.Events = append(span.Events, data)
 
 	if data.Type == reader.FINISH_SPAN {
 		for _, r := range s.readers {

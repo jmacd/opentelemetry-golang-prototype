@@ -1,11 +1,21 @@
 package stdout
 
 import (
-	"github.com/lightstep/opentelemetry-golang-prototype/exporter/buffer"
+	"os"
+
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
-	"github.com/lightstep/opentelemetry-golang-prototype/exporter/stderr"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/reader"
+	"github.com/lightstep/opentelemetry-golang-prototype/exporter/reader/format"
+)
+
+type (
+	stdoutLog struct{}
 )
 
 func New() observer.Observer {
-	return buffer.NewBuffer(1000, stderr.New())
+	return reader.NewReaderObserver(&stdoutLog{})
+}
+
+func (s *stdoutLog) Read(data reader.Event) {
+	os.Stdout.WriteString(format.EventToString(data))
 }
