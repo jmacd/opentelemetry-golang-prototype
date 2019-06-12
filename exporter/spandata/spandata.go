@@ -1,35 +1,55 @@
 package spandata
 
 import (
-	"io"
-
+	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/reader"
 )
 
 type (
 	Reader interface {
-		Read(Span)
+		Read(*Span)
 	}
 
 	Span struct {
+		events []reader.Event
 	}
 
 	spanReader struct {
+		spans   map[core.SpanContext]*Span
+		readers []Reader
 	}
 )
 
-func NewReaderObserver(w io.Writer) observer.Observer {
-	return reader.NewReaderObserver(&spanReader{})
+func NewReaderObserver(readers ...Reader) observer.Observer {
+	return reader.NewReaderObserver(&spanReader{
+		spans:   map[core.SpanContext]*Span{},
+		readers: readers,
+	})
 }
 
 func (s *spanReader) Read(data reader.Event) {
-	switch data.Type {
-	case reader.START_SPAN:
-	case reader.FINISH_SPAN:
-	case reader.LOG_EVENT:
-	case reader.LOGF_EVENT:
-	case reader.MODIFY_ATTR:
-	case reader.RECORD_STATS:
+	if !data.SpanContext.HasSpanID() {
+		return
+	}
+	var span *Span
+	if data.Type == reader.START_SPAN {
+		span = &Span{events: make([]reader.Event, 4)}
+		s.spans[data.SpanContext] = span
+	} else {
+		span := s.spans[data.SpanContext]
+		if span == nil {
+			// TODO count and report this.
+			return
+		}
+	}
+
+	span.events = append(span.events, data)
+
+	if data.Type == reader.FINISH_SPAN {
+		for _, r := range s.readers {
+			r.Read(span)
+		}
+		delete(s.spans, data.SpanContext)
 	}
 }
