@@ -9,6 +9,8 @@ import (
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
 
+// TODO add buffer support directly, eliminate stdout
+
 func init() {
 	pluginName := os.Getenv("OPENTELEMETRY_LIB")
 	if pluginName == "" {
@@ -35,7 +37,6 @@ func init() {
 }
 
 func Flush() {
-	// TODO add Flush support in loader
 	// TODO implement for exporter/{stdout,stderr,buffer}
 	time.Sleep(1 * time.Second)
 }

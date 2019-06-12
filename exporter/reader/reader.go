@@ -40,7 +40,7 @@ type (
 	readerObserver struct {
 		readers []Reader
 
-		// core.EventID -> *readerSpan
+		// core.EventID -> *readerSpan or *readerScope
 		scopes sync.Map
 
 		// core.EventID -> *readerMeasure
@@ -74,6 +74,8 @@ type (
 	readerScope struct {
 		span       *readerSpan
 		attributes tag.Map
+
+		// TODO preserve scope chain, for cleanup
 	}
 )
 
@@ -167,6 +169,9 @@ func (ro *readerObserver) Observe(event observer.Event) {
 		read.SpanContext = span.spanContext
 
 		// TODO: recovered
+
+		// TODO: erase scope chain
+
 	case observer.NEW_SCOPE, observer.MODIFY_ATTR:
 		var span *readerSpan
 		var m tag.Map
