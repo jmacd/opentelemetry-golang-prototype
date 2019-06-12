@@ -9,8 +9,7 @@ import (
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/reader"
 )
 
-func EventToString(data reader.Event) string {
-	var buf strings.Builder
+func AppendEvent(buf *strings.Builder, data reader.Event) {
 
 	f := func(skipIf bool) func(kv core.KeyValue) bool {
 		return func(kv core.KeyValue) bool {
@@ -85,8 +84,12 @@ func EventToString(data reader.Event) string {
 
 	// Attach the scope (span) attributes and context tags.
 	buf.WriteString(" [")
-	data.Attributes.Foreach(f(false))
-	data.Tags.Foreach(f(true))
+	if data.Attributes != nil {
+		data.Attributes.Foreach(f(false))
+	}
+	if data.Tags != nil {
+		data.Tags.Foreach(f(true))
+	}
 	if data.SpanContext.HasSpanID() {
 		f(false)(trace.SpanIDKey.String(data.SpanContext.SpanIDString()))
 	}
@@ -95,6 +98,10 @@ func EventToString(data reader.Event) string {
 	}
 
 	buf.WriteString(" ]\n")
+}
 
+func EventToString(data reader.Event) string {
+	var buf strings.Builder
+	AppendEvent(&buf, data)
 	return buf.String()
 }

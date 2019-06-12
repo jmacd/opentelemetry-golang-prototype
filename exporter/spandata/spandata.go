@@ -34,10 +34,10 @@ func (s *spanReader) Read(data reader.Event) {
 	}
 	var span *Span
 	if data.Type == reader.START_SPAN {
-		span = &Span{Events: make([]reader.Event, 4)}
+		span = &Span{Events: make([]reader.Event, 0, 4)}
 		s.spans[data.SpanContext] = span
 	} else {
-		span := s.spans[data.SpanContext]
+		span = s.spans[data.SpanContext]
 		if span == nil {
 			// TODO count and report this.
 			return
