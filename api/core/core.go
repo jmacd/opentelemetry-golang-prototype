@@ -41,6 +41,7 @@ type (
 		// pre-aggregated measures via the stats.Record API.
 		Measure Measure
 		Value   float64
+		ScopeID ScopeID
 	}
 
 	Key interface {
@@ -170,4 +171,9 @@ func (s SpanContext) Scope() ScopeID {
 	return ScopeID{
 		SpanContext: s,
 	}
+}
+
+func (m Measurement) With(id ScopeID) Measurement {
+	m.ScopeID = id
+	return m
 }

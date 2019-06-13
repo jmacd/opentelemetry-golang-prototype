@@ -9,6 +9,7 @@ import (
 
 type (
 	Map interface {
+		// TODO combine these four into a struct
 		Apply(a1 core.KeyValue, attributes []core.KeyValue, m1 core.Mutator, mutators []core.Mutator) Map
 
 		Value(core.Key) (core.Value, bool)

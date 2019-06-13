@@ -4,8 +4,7 @@ import (
 	"context"
 
 	"github.com/lightstep/opentelemetry-golang-prototype/api/core"
-	"github.com/lightstep/opentelemetry-golang-prototype/api/trace"
-	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
+	"github.com/lightstep/opentelemetry-golang-prototype/api/stats"
 )
 
 type (
@@ -34,24 +33,7 @@ func (g *Float64Gauge) DefinitionID() core.EventID {
 }
 
 func (g Float64Entry) Set(ctx context.Context, val float64) {
-	observer.Record(observer.Event{
-		Type: observer.SET_GAUGE,
-		Scope: core.ScopeID{
-			EventID:     g.eventID,
-			SpanContext: trace.Active(ctx).ScopeID().SpanContext,
-		},
-		Metric:  g.metric.DefinitionID(),
-		Context: ctx,
-		Float64: val,
-	})
-}
-
-func (g Float64Entry) Add(ctx context.Context, val float64) {
-	observer.Record(observer.Event{
-		Type:    observer.ADD_GAUGE,
-		Scope:   g.eventID.Scope(),
-		Metric:  g.metric.DefinitionID(),
-		Context: ctx,
-		Float64: val,
-	})
+	stats.Record(ctx, g.base.measure.M(val).With(core.ScopeID{
+		EventID: g.eventID,
+	}))
 }

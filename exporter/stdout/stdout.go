@@ -1,4 +1,4 @@
-package stderr
+package stdout
 
 import (
 	"os"
@@ -9,13 +9,13 @@ import (
 )
 
 type (
-	stderrLog struct{}
+	stdoutLog struct{}
 )
 
 func New() observer.Observer {
-	return reader.NewReaderObserver(&stderrLog{})
+	return reader.NewReaderObserver(&stdoutLog{})
 }
 
-func (s *stderrLog) Read(data reader.Event) {
-	os.Stderr.WriteString(format.EventToString(data))
+func (s *stdoutLog) Read(data reader.Event) {
+	os.Stdout.WriteString(format.EventToString(data))
 }

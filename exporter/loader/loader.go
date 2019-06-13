@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"os"
 	"plugin"
+	"time"
 
 	"github.com/lightstep/opentelemetry-golang-prototype/exporter/observer"
 )
+
+// TODO add buffer support directly, eliminate stdout
 
 func init() {
 	pluginName := os.Getenv("OPENTELEMETRY_LIB")
@@ -31,4 +34,9 @@ func init() {
 		return
 	}
 	observer.RegisterObserver(*obs)
+}
+
+func Flush() {
+	// TODO implement for exporter/{stdout,stderr,buffer}
+	time.Sleep(1 * time.Second)
 }

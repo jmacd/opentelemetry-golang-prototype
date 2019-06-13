@@ -27,7 +27,7 @@ type (
 		SpanContext core.SpanContext
 		Tags        tag.Map
 		Attributes  tag.Map
-		Stats       []core.Measurement
+		Stats       []Measurement
 
 		Parent           core.SpanContext
 		ParentAttributes tag.Map
@@ -37,10 +37,16 @@ type (
 		Message  string
 	}
 
+	Measurement struct {
+		Measure core.Measure
+		Value   float64
+		Tags    tag.Map
+	}
+
 	readerObserver struct {
 		readers []Reader
 
-		// core.EventID -> *readerSpan
+		// core.EventID -> *readerSpan or *readerScope
 		scopes sync.Map
 
 		// core.EventID -> *readerMeasure
@@ -73,6 +79,7 @@ type (
 
 	readerScope struct {
 		span       *readerSpan
+		parent     core.EventID
 		attributes tag.Map
 	}
 )
@@ -83,8 +90,6 @@ const (
 	FINISH_SPAN
 	LOG_EVENT
 	LOGF_EVENT
-	SET_GAUGE
-	ADD_GAUGE
 	MODIFY_ATTR
 	RECORD_STATS
 )
@@ -93,9 +98,6 @@ const (
 // necessary state needed by a reader to process events in memory.
 // Practically, this means tracking live metric handles and scope
 // attribute sets.
-//
-// TODO this type should track time-to-live for various things
-// to ensure a memory limit.
 func NewReaderObserver(readers ...Reader) observer.Observer {
 	return &readerObserver{
 		readers: readers,
@@ -167,6 +169,7 @@ func (ro *readerObserver) Observe(event observer.Event) {
 		read.SpanContext = span.spanContext
 
 		// TODO: recovered
+
 	case observer.NEW_SCOPE, observer.MODIFY_ATTR:
 		var span *readerSpan
 		var m tag.Map
@@ -174,8 +177,7 @@ func (ro *readerObserver) Observe(event observer.Event) {
 
 		if event.Scope.EventID == 0 {
 			// TODO: This is racey. Do this at the call
-			// site somehow.  Follow the OTel resource
-			// definition SDK discussion.
+			// site via Resources.
 			sid = trace.GlobalTracer().ScopeID()
 		} else {
 			sid = event.Scope
@@ -197,7 +199,8 @@ func (ro *readerObserver) Observe(event observer.Event) {
 		}
 
 		sc := &readerScope{
-			span: span,
+			span:   span,
+			parent: sid.EventID,
 			attributes: m.Apply(
 				event.Attribute,
 				event.Attributes,
@@ -260,38 +263,19 @@ func (ro *readerObserver) Observe(event observer.Event) {
 			read.SpanContext = span.spanContext
 		}
 
-	case observer.SET_GAUGE, observer.ADD_GAUGE:
-		metricI, ok := ro.metrics.Load(event.Metric)
-		if !ok {
-			panic("Metric not defined")
-		}
-		metric := metricI.(*readerMetric)
-
-		read.Name = metric.readerMeasure.name
-
-		attrs, span := ro.readScope(event.Scope)
-		read.Attributes = attrs
-		if span != nil {
-			read.SpanContext = span.spanContext
-		}
-		// TODO filter to pre-aggregated tag set
-
-		if event.Type == observer.SET_GAUGE {
-			read.Type = SET_GAUGE
-		} else {
-			read.Type = ADD_GAUGE
-		}
-
 	case observer.RECORD_STATS:
-
 		read.Type = RECORD_STATS
 
-		attrs, span := ro.readScope(event.Scope)
-		read.Attributes = attrs
+		_, span := ro.readScope(event.Scope)
 		if span != nil {
 			read.SpanContext = span.spanContext
 		}
-		read.Stats = event.Stats
+		for _, es := range event.Stats {
+			ro.addMeasurement(&read, es)
+		}
+		if event.Stat.Measure != nil {
+			ro.addMeasurement(&read, event.Stat)
+		}
 
 	default:
 		panic(fmt.Sprint("Unhandled case: ", event.Type))
@@ -300,6 +284,19 @@ func (ro *readerObserver) Observe(event observer.Event) {
 	for _, reader := range ro.readers {
 		reader.Read(read)
 	}
+
+	if event.Type == observer.FINISH_SPAN {
+		ro.cleanupSpan(event.Scope.EventID)
+	}
+}
+
+func (ro *readerObserver) addMeasurement(e *Event, m core.Measurement) {
+	attrs, _ := ro.readScope(m.ScopeID)
+	e.Stats = append(e.Stats, Measurement{
+		Measure: m.Measure,
+		Value:   m.Value,
+		Tags:    attrs,
+	})
 }
 
 func (ro *readerObserver) readScope(id core.ScopeID) (tag.Map, *readerSpan) {
@@ -316,4 +313,20 @@ func (ro *readerObserver) readScope(id core.ScopeID) (tag.Map, *readerSpan) {
 		return sp.attributes, sp
 	}
 	return tag.EmptyMap, nil
+}
+
+func (ro *readerObserver) cleanupSpan(id core.EventID) {
+	for id != 0 {
+		ev, has := ro.scopes.Load(id)
+		if !has {
+			panic(fmt.Sprintln("scope not found", id))
+		}
+		ro.scopes.Delete(id)
+
+		if sp, ok := ev.(*readerScope); ok {
+			id = sp.parent
+		} else if sp, ok := ev.(*readerSpan); ok {
+			id = sp.parent
+		}
+	}
 }
